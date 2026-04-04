@@ -304,7 +304,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - GitHub: [@Sasisundar2211](https://github.com/Sasisundar2211)
 - LinkedIn: [Connect with me](https://linkedin.com/in/sasisundar)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Sentence-BERT team for pre-trained models
 - Open-source NLP community
