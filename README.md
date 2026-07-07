@@ -218,11 +218,15 @@ for result in results:
 
 ## 🔗 Live Demo
 
-**[Try the Live Demo →](http://your-demo-url.com)** *(Coming soon)*
+**[Try the Live Demo →](https://ai-resume-ranking-app.onrender.com)**
 
 **Demo Credentials**:
 - Username: `demo@example.com`
 - Password: `demo123`
+
+### Deployment
+- Hosted on Render using the Flask entrypoint (`app.py`)
+- Production server: `gunicorn app:app`
 
 ## 📁 Project Structure
 ```

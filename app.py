@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 from flask import Flask, jsonify, render_template, request
 
 from src.preprocessing.entity_extractor import extract_skills
@@ -59,4 +61,5 @@ def rank_batch_endpoint():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
