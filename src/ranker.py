@@ -15,7 +15,7 @@ from .preprocessing.text_cleaner import clean_text
 
 @dataclass
 class ScoreWeights:
-    semantic: float = 0.6
+    text_similarity: float = 0.6
     skills: float = 0.3
     experience: float = 0.1
 
@@ -42,7 +42,7 @@ class ResumeRanker:
         self.tfidf.fit([jd, resume])
         jd_vec = self.tfidf.transform(jd)
         resume_vec = self.tfidf.transform(resume)
-        semantic_score = max(0.0, cosine_similarity(jd_vec, resume_vec))
+        text_similarity_score = max(0.0, cosine_similarity(jd_vec, resume_vec))
 
         jd_skills = set(extract_skills(jd))
         resume_skills = set(extract_skills(resume))
@@ -56,7 +56,7 @@ class ResumeRanker:
             experience_score = min(1.0, resume_years / jd_years)
 
         final_score = (
-            self.weights.semantic * semantic_score
+            self.weights.text_similarity * text_similarity_score
             + self.weights.skills * skill_score
             + self.weights.experience * experience_score
         )
