@@ -1,26 +1,84 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="An AI-assisted resume analysis and ranking project built with Python and Flask.">
-  <title>AI Resume Ranking · Sasi Sundar</title>
-  <style>
-    :root { color-scheme: dark; --ink:#edf2ff; --muted:#adbbda; --line:#2b3b60; --accent:#7aa8ff; }
-    * { box-sizing:border-box } body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px; font:16px/1.6 Inter,system-ui,sans-serif; color:var(--ink); background:radial-gradient(circle at 15% 10%,#243a70 0,transparent 34rem),#0b1120; }
-    main { width:min(720px,100%); padding:clamp(32px,8vw,72px); border:1px solid var(--line); border-radius:24px; background:rgba(15,23,42,.82); box-shadow:0 28px 70px rgba(0,0,0,.3) }
-    .eyebrow { color:var(--accent); font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:.78rem } h1 { margin:.5rem 0 1rem; font-size:clamp(2.2rem,7vw,4.5rem); line-height:1.05; letter-spacing:-.05em } p { color:var(--muted); max-width:58ch } .stack { display:inline-block; margin:1.25rem 0 2rem; padding:.35rem .7rem; border:1px solid var(--line); border-radius:999px; color:#c9d8ff; font-size:.9rem } a { display:inline-block; padding:.78rem 1.05rem; border-radius:10px; color:#061125; background:#a9c7ff; text-decoration:none; font-weight:750 } a:hover { background:#d5e3ff } footer { margin-top:3rem; color:#7182a8; font-size:.86rem }
-  </style>
-</head>
-<body>
-  <main>
-    <div class="eyebrow">Sasi Sundar · Project</div>
-    <h1>AI Resume Ranking</h1>
-    <p>An AI-assisted resume analysis and ranking project built with Python and Flask.</p>
-    <span class="stack">Python / Flask</span><br>
-    <a href="https://github.com/Sasisundar2211/AI-Resume_Ranking-app">Explore the source code →</a>
-    <footer>Versioned project page · deployed with GitHub Pages</footer>
-  </main>
-</body>
-</html>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>AI Resume Screening & Candidate Ranking System</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.63.1/build/stlite.css"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.63.1/build/stlite.js"></script>
+    <script>
+      stlite.mount(
+        {
+          requirements: ["PyPDF2", "pandas", "scikit-learn"],
+          mainScriptData: `
+import streamlit as st
+from PyPDF2 import PdfReader
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
+# Function to extract text from PDF
+def extract_text_from_pdf(file):
+    pdf = PdfReader(file)
+    text = ""
+    for page in pdf.pages:
+        text += page.extract_text()
+    return text
+
+# Function to rank resumes based on job description
+def rank_resumes(job_description, resumes):
+    # Combine job description with resumes
+    documents = [job_description] + resumes
+    vectorizer = TfidfVectorizer().fit_transform(documents)
+    vectors = vectorizer.toarray()
+
+    # Calculate cosine similarity
+    job_description_vector = vectors[0]
+    resume_vectors = vectors [1:]
+    cosine_similarities = cosine_similarity ([job_description_vector], resume_vectors).flatten()
+
+    return cosine_similarities
+
+# Streamlit app
+st.title("AI Resume Screening & Candidate Ranking System")
+# Job description input
+st.header("Job Description")
+job_description= st.text_area ("Enter the job description")
+
+# File uploader
+st.header("Upload Resumes")
+uploaded_files = st.file_uploader("Upload PDF files", type=["pdf"], accept_multiple_files=True)
+
+if uploaded_files and job_description:
+    st.header("Ranking Resumes")
+
+    resumes = []
+    for file in uploaded_files:
+        text = extract_text_from_pdf(file)
+        resumes.append(text)
+
+    # Rank resumes
+    scores = rank_resumes(job_description, resumes)
+
+    # Display scores
+    results = pd.DataFrame({"Resume": [file.name for file in uploaded_files], "Score": scores })
+    results = results.sort_values(by="Score", ascending=False)
+
+    st.write(results)
+`
+        },
+        document.getElementById("root")
+      );
+    </script>
+  </body>
+</html>
