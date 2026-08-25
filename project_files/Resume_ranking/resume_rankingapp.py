@@ -7,10 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 # Function to extract text from PDF
 def extract_text_from_pdf(file):
     pdf = PdfReader(file)
-    text = ""
-    for page in pdf.pages:
-        text += page.extract_text()
-    return text
+    return "".join(page.extract_text() or "" for page in pdf.pages)
 
 # Function to rank resumes based on job description
 def rank_resumes(job_description, resumes):
