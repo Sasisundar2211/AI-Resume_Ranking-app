@@ -286,6 +286,49 @@ class TestAPIEndpoints(unittest.TestCase):
         self.assertIsInstance(data, list)
         self.assertEqual(len(data), 2)
 
+    def test_batch_ranking_exceeds_max_batch_size(self):
+        """Test that batch ranking endpoint rejects requests exceeding max batch size."""
+        from app import MAX_BATCH_SIZE
+        payload = {
+            'job_description': 'Looking for Python developer',
+            'resumes': [{'name': f'Candidate {i}', 'text': 'Python expert'} for i in range(MAX_BATCH_SIZE + 1)]
+        }
+        response = self.client.post('/api/rank/batch', json=payload)
+        self.assertEqual(response.status_code, 400)
+        data = response.get_json()
+        self.assertIn('error', data)
+
+    def test_batch_ranking_exceeds_max_text_length(self):
+        """Test that batch ranking endpoint rejects resumes with excessive text length."""
+        from app import MAX_TEXT_LENGTH
+        payload = {
+            'job_description': 'Looking for Python developer',
+            'resumes': [{'name': 'John', 'text': 'A' * (MAX_TEXT_LENGTH + 1)}]
+        }
+        response = self.client.post('/api/rank/batch', json=payload)
+        self.assertEqual(response.status_code, 400)
+        data = response.get_json()
+        self.assertIn('error', data)
+
+    def test_batch_ranking_invalid_resumes_format(self):
+        """Test that batch ranking endpoint rejects non-list resumes argument."""
+        payload = {
+            'job_description': 'Looking for Python developer',
+            'resumes': 'invalid format'
+        }
+        response = self.client.post('/api/rank/batch', json=payload)
+        self.assertEqual(response.status_code, 400)
+
+    def test_rank_single_exceeds_max_text_length(self):
+        """Test single rank endpoint rejects text exceeding max length limit."""
+        from app import MAX_TEXT_LENGTH
+        payload = {
+            'job_description': 'Looking for developer',
+            'resume': 'B' * (MAX_TEXT_LENGTH + 1)
+        }
+        response = self.client.post('/api/rank', json=payload)
+        self.assertEqual(response.status_code, 400)
+
 
 class TestModelPerformance(unittest.TestCase):
     """Test cases for model performance and accuracy."""

@@ -10,6 +10,9 @@ from src.ranker import ResumeRanker
 app = Flask(__name__)
 ranker = ResumeRanker()
 
+MAX_BATCH_SIZE = 100
+MAX_TEXT_LENGTH = 50000
+
 
 @app.get("/")
 def home():
@@ -29,6 +32,12 @@ def rank_single_endpoint():
     if not job_description or not resume:
         return jsonify({"error": "job_description and resume are required"}), 400
 
+    if not isinstance(job_description, str) or not isinstance(resume, str):
+        return jsonify({"error": "job_description and resume must be strings"}), 400
+
+    if len(job_description) > MAX_TEXT_LENGTH or len(resume) > MAX_TEXT_LENGTH:
+        return jsonify({"error": f"Text payload exceeds maximum allowed length of {MAX_TEXT_LENGTH} characters"}), 400
+
     score_result = ranker.rank_single(job_description, resume)
     if isinstance(score_result, dict):
         return jsonify(score_result)
@@ -43,6 +52,24 @@ def rank_batch_endpoint():
     resumes = data.get("resumes")
     if not job_description or not resumes:
         return jsonify({"error": "job_description and resumes are required"}), 400
+
+    if not isinstance(job_description, str):
+        return jsonify({"error": "job_description must be a string"}), 400
+
+    if len(job_description) > MAX_TEXT_LENGTH:
+        return jsonify({"error": f"job_description exceeds maximum allowed length of {MAX_TEXT_LENGTH} characters"}), 400
+
+    if not isinstance(resumes, list):
+        return jsonify({"error": "resumes must be a list"}), 400
+
+    if len(resumes) > MAX_BATCH_SIZE:
+        return jsonify({"error": f"resumes count exceeds maximum allowed batch limit of {MAX_BATCH_SIZE}"}), 400
+
+    for item in resumes:
+        if isinstance(item, dict):
+            text = item.get("text", "")
+            if isinstance(text, str) and len(text) > MAX_TEXT_LENGTH:
+                return jsonify({"error": f"Resume text exceeds maximum allowed length of {MAX_TEXT_LENGTH} characters"}), 400
 
     resume_texts = [item.get("text", "") for item in resumes if isinstance(item, dict)]
     ranked = ranker.rank_batch(job_description, resume_texts)
