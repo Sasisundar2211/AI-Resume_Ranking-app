@@ -25,6 +25,11 @@ SKILL_KEYWORDS = {
     "sql": "SQL",
 }
 
+_SKILL_PATTERNS = [
+    (re.compile(rf"\b{re.escape(key)}\b"), canonical)
+    for key, canonical in SKILL_KEYWORDS.items()
+]
+
 
 def extract_email(text: str) -> Optional[str]:
     match = _EMAIL_RE.search(text or "")
@@ -39,7 +44,7 @@ def extract_phone(text: str) -> Optional[str]:
 def extract_skills(text: str) -> List[str]:
     lowered = clean_text(text).lower()
     found: List[str] = []
-    for key, canonical in SKILL_KEYWORDS.items():
-        if re.search(rf"\b{re.escape(key)}\b", lowered):
+    for pattern, canonical in _SKILL_PATTERNS:
+        if pattern.search(lowered):
             found.append(canonical)
     return sorted(set(found))
