@@ -5,10 +5,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Function to extract text from PDF
-def extract_text_from_pdf(file):
+def extract_text_from_pdf(file, max_pages=100):
     pdf = PdfReader(file)
     text = ""
-    for page in pdf.pages:
+    for i, page in enumerate(pdf.pages):
+        if i >= max_pages:
+            break
         text += page.extract_text()
     return text
 
