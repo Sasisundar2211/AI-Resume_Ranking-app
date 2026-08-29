@@ -2,7 +2,6 @@
 import unittest
 from unittest.mock import Mock, patch, MagicMock
 import numpy as np
-import pandas as pd
 
 
 class TestResumePreprocessing(unittest.TestCase):
